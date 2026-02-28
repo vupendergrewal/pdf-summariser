@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Summariser</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 min-h-screen flex items-center justify-center">
+    <div class="bg-gray-800 p-10 rounded-2xl shadow-2xl w-full max-w-lg text-center">
+        <h1 class="text-4xl font-bold text-white mb-2">📄 PDF Summariser</h1>
+        <p class="text-gray-400 mb-8">Upload a PDF and get an AI-powered summary instantly</p>
+        <form action="/summarise" method="POST" enctype="multipart/form-data">
+            <div class="border-2 border-dashed border-gray-500 rounded-xl p-8 mb-6 hover:border-blue-400 transition">
+                <input type="file" name="pdf" accept=".pdf" class="text-gray-300 w-full cursor-pointer"/>
+                <p class="text-gray-500 text-sm mt-2">Only PDF files supported</p>
+            </div>
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition duration-200">
+                🚀 Summarise My PDF
+            </button>
+        </form>
+    </div>
+</body>
+</html>
