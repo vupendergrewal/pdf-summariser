@@ -3,31 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Summary Result</title>
+    <title>PDF Summariser — Results</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body class="bg-gray-900 min-h-screen p-10">
-    <div class="max-w-3xl mx-auto">
-        <h1 class="text-4xl font-bold text-white mb-2 text-center">📄 PDF Summariser</h1>
-        <p class="text-gray-400 text-center mb-8">Your AI-powered summary is ready</p>
+<body class="bg-gray-900 min-h-screen p-6">
+    <div class="max-w-4xl mx-auto">
+
+        <h1 class="text-4xl font-bold text-white mb-1 text-center">📄 PDF Summariser</h1>
+        <p class="text-gray-400 text-center mb-8">Your AI-powered analysis is ready</p>
 
         {% if error %}
         <div class="bg-red-800 text-white p-4 rounded-xl mb-6">❌ {{ error }}</div>
         {% else %}
 
         <!-- Stats Row -->
-        <div class="grid grid-cols-3 gap-4 mb-6">
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
             <div class="bg-gray-800 p-4 rounded-xl text-center">
                 <p class="text-blue-400 text-2xl font-bold">{{ word_count }}</p>
-                <p class="text-gray-400 text-sm">Total Words</p>
+                <p class="text-gray-400 text-xs">Total Words</p>
             </div>
             <div class="bg-gray-800 p-4 rounded-xl text-center">
                 <p class="text-green-400 text-2xl font-bold">{{ sentence_count }}</p>
-                <p class="text-gray-400 text-sm">Summary Sentences</p>
+                <p class="text-gray-400 text-xs">Summary Lines</p>
             </div>
             <div class="bg-gray-800 p-4 rounded-xl text-center">
-                <p class="text-purple-400 text-2xl font-bold">📁</p>
-                <p class="text-gray-400 text-sm">{{ filename }}</p>
+                <p class="text-yellow-400 text-2xl font-bold">{{ reading_time }}m</p>
+                <p class="text-gray-400 text-xs">Reading Time</p>
+            </div>
+            <div class="bg-gray-800 p-4 rounded-xl text-center">
+                <p class="text-pink-400 text-2xl font-bold">{{ sentiment }}</p>
+                <p class="text-gray-400 text-xs">Tone</p>
+            </div>
+            <div class="bg-gray-800 p-4 rounded-xl text-center">
+                <p class="text-purple-400 text-2xl font-bold">{{ difficulty }}</p>
+                <p class="text-gray-400 text-xs">Difficulty</p>
+            </div>
+        </div>
+
+        <!-- Key Topics -->
+        <div class="bg-gray-800 p-5 rounded-xl mb-6">
+            <h2 class="text-white font-bold mb-3">🏷️ Key Topics</h2>
+            <div class="flex flex-wrap gap-2">
+                {% for topic in topics %}
+                <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-sm">{{ topic }}</span>
+                {% endfor %}
             </div>
         </div>
 
@@ -42,14 +61,14 @@
             <form action="/download/word" method="POST" class="flex-1">
                 <input type="hidden" name="summary" value="{{ summary }}">
                 <input type="hidden" name="filename" value="{{ filename }}">
-                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl transition">
+                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl transition">
                     📥 Download as Word
                 </button>
             </form>
             <form action="/download/pdf" method="POST" class="flex-1">
                 <input type="hidden" name="summary" value="{{ summary }}">
                 <input type="hidden" name="filename" value="{{ filename }}">
-                <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-xl transition">
+                <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition">
                     📥 Download as PDF
                 </button>
             </form>
@@ -57,9 +76,9 @@
 
         <!-- Chat Section -->
         <div class="bg-gray-800 p-6 rounded-xl mb-6">
-            <h2 class="text-white text-xl font-bold mb-2">💬 Chat With Your PDF</h2>
-            <p class="text-gray-400 text-sm mb-4">Ask any question about the document</p>
-            <div id="chat-box" class="bg-gray-900 rounded-xl p-4 h-64 overflow-y-auto mb-4 space-y-3">
+            <h2 class="text-white text-xl font-bold mb-1">💬 Chat With Your PDF</h2>
+            <p class="text-gray-400 text-sm mb-4">Ask anything about this document — I remember the conversation!</p>
+            <div id="chat-box" class="bg-gray-900 rounded-xl p-4 h-72 overflow-y-auto mb-4 space-y-3">
                 <p class="text-gray-500 text-sm text-center">Ask your first question below 👇</p>
             </div>
             <div class="flex gap-3">
@@ -75,13 +94,14 @@
 
         {% endif %}
 
-        <!-- Back Button -->
-        <a href="/" class="block text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition">
+        <a href="/" class="block text-center bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-xl transition">
             ⬅ Summarise Another PDF
         </a>
     </div>
-<script>
-    const documentText = `{{ document_text | safe }}`;
+
+    <script>
+    const documentText = {{ document_text | tojson }};
+    let chatHistory = [];
 
     async function askQuestion() {
         const input = document.getElementById("question-input");
@@ -91,22 +111,15 @@
 
         chatBox.innerHTML += `
             <div class="text-right mb-2">
-                <span class="bg-blue-600 text-white px-4 py-2 rounded-xl inline-block">
-                    ${question}
-                </span>
-            </div>
-        `;
+                <span class="bg-blue-600 text-white px-4 py-2 rounded-xl inline-block max-w-xs">${question}</span>
+            </div>`;
 
         input.value = "";
-
+        const thinkingId = "thinking-" + Date.now();
         chatBox.innerHTML += `
-            <div class="text-left mb-2" id="thinking">
-                <span class="bg-gray-700 text-gray-300 px-4 py-2 rounded-xl inline-block">
-                    Thinking...
-                </span>
-            </div>
-        `;
-
+            <div class="text-left mb-2" id="${thinkingId}">
+                <span class="bg-gray-700 text-gray-400 px-4 py-2 rounded-xl inline-block">⏳ Thinking...</span>
+            </div>`;
         chatBox.scrollTop = chatBox.scrollHeight;
 
         try {
@@ -115,34 +128,28 @@
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify({
                     question: question,
-                    document_text: documentText
+                    document_text: documentText,
+                    history: chatHistory
                 })
             });
 
             const data = await response.json();
+            chatHistory.push({question: question, answer: data.answer});
 
-            document.getElementById("thinking").innerHTML = `
-                <span class="bg-gray-700 text-gray-300 px-4 py-2 rounded-xl inline-block">
-                    ${data.answer}
-                </span>
-            `;
-
-            chatBox.scrollTop = chatBox.scrollHeight;
+            document.getElementById(thinkingId).innerHTML = `
+                <span class="bg-gray-700 text-gray-300 px-4 py-2 rounded-xl inline-block max-w-xs">${data.answer}</span>`;
 
         } catch (error) {
-            document.getElementById("thinking").innerHTML = `
-                <span class="bg-gray-700 text-red-400 px-4 py-2 rounded-xl inline-block">
-                    Server error.
-                </span>
-            `;
+            document.getElementById(thinkingId).innerHTML = `
+                <span class="bg-red-900 text-red-300 px-4 py-2 rounded-xl inline-block">Server error. Try again.</span>`;
         }
+
+        chatBox.scrollTop = chatBox.scrollHeight;
     }
 
-    document.getElementById("question-input")
-        .addEventListener("keypress", function(e) {
-            if (e.key === "Enter") askQuestion();
-        });
-</script>
-    
+    document.getElementById("question-input").addEventListener("keypress", function(e) {
+        if (e.key === "Enter") askQuestion();
+    });
+    </script>
 </body>
 </html>
