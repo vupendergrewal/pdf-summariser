@@ -10,9 +10,12 @@
     <div class="max-w-3xl mx-auto">
         <h1 class="text-4xl font-bold text-white mb-2 text-center">📄 PDF Summariser</h1>
         <p class="text-gray-400 text-center mb-8">Your AI-powered summary is ready</p>
+
         {% if error %}
         <div class="bg-red-800 text-white p-4 rounded-xl mb-6">❌ {{ error }}</div>
         {% else %}
+
+        <!-- Stats Row -->
         <div class="grid grid-cols-3 gap-4 mb-6">
             <div class="bg-gray-800 p-4 rounded-xl text-center">
                 <p class="text-blue-400 text-2xl font-bold">{{ word_count }}</p>
@@ -27,163 +30,80 @@
                 <p class="text-gray-400 text-sm">{{ filename }}</p>
             </div>
         </div>
+
+        <!-- Summary Box -->
         <div class="bg-gray-800 p-6 rounded-xl mb-6">
             <h2 class="text-white text-xl font-bold mb-4">📝 Summary</h2>
             <p class="text-gray-300 leading-relaxed">{{ summary }}</p>
         </div>
+
+        <!-- Download Buttons -->
+        <div class="flex gap-4 mb-6">
+            <form action="/download/word" method="POST" class="flex-1">
+                <input type="hidden" name="summary" value="{{ summary }}">
+                <input type="hidden" name="filename" value="{{ filename }}">
+                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl transition">
+                    📥 Download as Word
+                </button>
+            </form>
+            <form action="/download/pdf" method="POST" class="flex-1">
+                <input type="hidden" name="summary" value="{{ summary }}">
+                <input type="hidden" name="filename" value="{{ filename }}">
+                <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-xl transition">
+                    📥 Download as PDF
+                </button>
+            </form>
+        </div>
+
+        <!-- Chat Section -->
+        <div class="bg-gray-800 p-6 rounded-xl mb-6">
+            <h2 class="text-white text-xl font-bold mb-2">💬 Chat With Your PDF</h2>
+            <p class="text-gray-400 text-sm mb-4">Ask any question about the document</p>
+            <div id="chat-box" class="bg-gray-900 rounded-xl p-4 h-64 overflow-y-auto mb-4 space-y-3">
+                <p class="text-gray-500 text-sm text-center">Ask your first question below 👇</p>
+            </div>
+            <div class="flex gap-3">
+                <input type="text" id="question-input"
+                    placeholder="e.g. What is the main topic of this document?"
+                    class="flex-1 bg-gray-700 text-white rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"/>
+                <button onclick="askQuestion()"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-xl transition">
+                    Ask
+                </button>
+            </div>
+        </div>
+
         {% endif %}
-        <a href="/" class="block text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition duration-200">
+
+        <!-- Back Button -->
+        <a href="/" class="block text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition">
             ⬅ Summarise Another PDF
         </a>
     </div>
-    <!-- Download Buttons -->
-<form action="/download/word" method="POST" class="inline">
-    <input type="hidden" name="summary" value="{{ summary }}">
-    <input type="hidden" name="filename" value="{{ filename }}">
-    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-xl mr-3 transition">
-        📥 Download as Word
-    </button>
-</form>
 
-<form action="/download/pdf" method="POST" class="inline">
-    <input type="hidden" name="summary" value="{{ summary }}">
-    <input type="hidden" name="filename" value="{{ filename }}">
-    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-xl transition">
-        📥 Download as PDF
-    </button>
-</form>
-<!-- Download Buttons -->
-<form action="/download/word" method="POST" class="inline">
-    <input type="hidden" name="summary" value="{{ summary }}">
-    <input type="hidden" name="filename" value="{{ filename }}">
-    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-xl mr-3 transition">
-        📥 Download as Word
-    </button>
-</form>
-
-<form action="/download/pdf" method="POST" class="inline">
-    <input type="hidden" name="summary" value="{{ summary }}">
-    <input type="hidden" name="filename" value="{{ filename }}">
-    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-xl transition">
-        📥 Download as PDF
-    </button>
-</form>
-<!-- Download Buttons -->
-<form action="/download/word" method="POST" class="inline">
-    <input type="hidden" name="summary" value="{{ summary }}">
-    <input type="hidden" name="filename" value="{{ filename }}">
-    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-xl mr-3 transition">
-        📥 Download as Word
-    </button>
-</form>
-
-<form action="/download/pdf" method="POST" class="inline">
-    <input type="hidden" name="summary" value="{{ summary }}">
-    <input type="hidden" name="filename" value="{{ filename }}">
-    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-xl transition">
-        📥 Download as PDF
-    </button>
-</form>
-<!-- Download Buttons -->
-<form action="/download/word" method="POST" class="inline">
-    <input type="hidden" name="summary" value="{{ summary }}">
-    <input type="hidden" name="filename" value="{{ filename }}">
-    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-xl mr-3 transition">
-        📥 Download as Word
-    </button>
-</form>
-
-<form action="/download/pdf" method="POST" class="inline">
-    <input type="hidden" name="summary" value="{{ summary }}">
-    <input type="hidden" name="filename" value="{{ filename }}">
-    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-xl transition">
-        📥 Download as PDF
-    </button>
-</form>
-<!-- Download Buttons -->
-<form action="/download/word" method="POST" class="inline">
-    <input type="hidden" name="summary" value="{{ summary }}">
-    <input type="hidden" name="filename" value="{{ filename }}">
-    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-xl mr-3 transition">
-        📥 Download as Word
-    </button>
-</form>
-
-<form action="/download/pdf" method="POST" class="inline">
-    <input type="hidden" name="summary" value="{{ summary }}">
-    <input type="hidden" name="filename" value="{{ filename }}">
-    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-xl transition">
-        📥 Download as PDF
-    </button>
-</form>
-
-<!-- Download Buttons -->
-<form action="/download/word" method="POST" class="inline">
-    <input type="hidden" name="summary" value="{{ summary }}">
-    <input type="hidden" name="filename" value="{{ filename }}">
-    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-xl mr-3 transition">
-        📥 Download as Word
-    </button>
-</form>
-
-<form action="/download/pdf" method="POST" class="inline">
-    <input type="hidden" name="summary" value="{{ summary }}">
-    <input type="hidden" name="filename" value="{{ filename }}">
-    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-xl transition">
-        📥 Download as PDF
-    </button>
-</form>
-
-<!-- Chat Section -->
-<div class="bg-gray-800 p-6 rounded-xl mt-6">
-    <h2 class="text-white text-xl font-bold mb-4">💬 Chat With Your PDF</h2>
-    <p class="text-gray-400 text-sm mb-4">Ask any question about the document</p>
-
-    <div id="chat-box" class="bg-gray-900 rounded-xl p-4 h-64 overflow-y-auto mb-4 space-y-3">
-        <p class="text-gray-500 text-sm text-center">Ask your first question below 👇</p>
-    </div>
-
-    <div class="flex gap-3">
-        <input type="text" id="question-input"
-            placeholder="e.g. What is the main topic of this document?"
-            class="flex-1 bg-gray-700 text-white rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"/>
-        <button onclick="askQuestion()"
-            class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-xl transition">
-            Ask
-        </button>
-    </div>
-</div>
-
-<script>
-const sessionId = "{{ session_id }}";
-
-async function askQuestion() {
-    const input = document.getElementById("question-input");
-    const chatBox = document.getElementById("chat-box");
-    const question = input.value.trim();
-    if (!question) return;
-
-    chatBox.innerHTML += `<div class="text-right"><span class="bg-blue-600 text-white px-4 py-2 rounded-xl inline-block">${question}</span></div>`;
-    input.value = "";
-    chatBox.innerHTML += `<div class="text-left"><span class="bg-gray-700 text-gray-300 px-4 py-2 rounded-xl inline-block">Thinking...</span></div>`;
-    chatBox.scrollTop = chatBox.scrollHeight;
-
-    const response = await fetch("/chat", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({question, session_id: sessionId})
+    <script>
+    const sessionId = "{{ session_id }}";
+    async function askQuestion() {
+        const input = document.getElementById("question-input");
+        const chatBox = document.getElementById("chat-box");
+        const question = input.value.trim();
+        if (!question) return;
+        chatBox.innerHTML += `<div class="text-right mb-2"><span class="bg-blue-600 text-white px-4 py-2 rounded-xl inline-block">${question}</span></div>`;
+        input.value = "";
+        chatBox.innerHTML += `<div class="text-left mb-2" id="thinking"><span class="bg-gray-700 text-gray-300 px-4 py-2 rounded-xl inline-block">Thinking...</span></div>`;
+        chatBox.scrollTop = chatBox.scrollHeight;
+        const response = await fetch("/chat", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({question, session_id: sessionId})
+        });
+        const data = await response.json();
+        document.getElementById("thinking").innerHTML = `<span class="bg-gray-700 text-gray-300 px-4 py-2 rounded-xl inline-block">${data.answer}</span>`;
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+    document.getElementById("question-input").addEventListener("keypress", function(e) {
+        if (e.key === "Enter") askQuestion();
     });
-
-    const data = await response.json();
-    const messages = chatBox.querySelectorAll("div");
-    messages[messages.length - 1].innerHTML = `<span class="bg-gray-700 text-gray-300 px-4 py-2 rounded-xl inline-block">${data.answer}</span>`;
-    chatBox.scrollTop = chatBox.scrollHeight;
-}
-
-document.getElementById("question-input").addEventListener("keypress", function(e) {
-    if (e.key === "Enter") askQuestion();
-});
-</script>
-
+    </script>
 </body>
 </html>
