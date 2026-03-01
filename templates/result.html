@@ -80,30 +80,69 @@
             ⬅ Summarise Another PDF
         </a>
     </div>
+<script>
+    const documentText = `{{ document_text | safe }}`;
 
-    <script>
-    const sessionId = "{{ session_id }}";
     async function askQuestion() {
         const input = document.getElementById("question-input");
         const chatBox = document.getElementById("chat-box");
         const question = input.value.trim();
         if (!question) return;
-        chatBox.innerHTML += `<div class="text-right mb-2"><span class="bg-blue-600 text-white px-4 py-2 rounded-xl inline-block">${question}</span></div>`;
+
+        chatBox.innerHTML += `
+            <div class="text-right mb-2">
+                <span class="bg-blue-600 text-white px-4 py-2 rounded-xl inline-block">
+                    ${question}
+                </span>
+            </div>
+        `;
+
         input.value = "";
-        chatBox.innerHTML += `<div class="text-left mb-2" id="thinking"><span class="bg-gray-700 text-gray-300 px-4 py-2 rounded-xl inline-block">Thinking...</span></div>`;
+
+        chatBox.innerHTML += `
+            <div class="text-left mb-2" id="thinking">
+                <span class="bg-gray-700 text-gray-300 px-4 py-2 rounded-xl inline-block">
+                    Thinking...
+                </span>
+            </div>
+        `;
+
         chatBox.scrollTop = chatBox.scrollHeight;
-        const response = await fetch("/chat", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({question, session_id: sessionId})
-        });
-        const data = await response.json();
-        document.getElementById("thinking").innerHTML = `<span class="bg-gray-700 text-gray-300 px-4 py-2 rounded-xl inline-block">${data.answer}</span>`;
-        chatBox.scrollTop = chatBox.scrollHeight;
+
+        try {
+            const response = await fetch("/chat", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({
+                    question: question,
+                    document_text: documentText
+                })
+            });
+
+            const data = await response.json();
+
+            document.getElementById("thinking").innerHTML = `
+                <span class="bg-gray-700 text-gray-300 px-4 py-2 rounded-xl inline-block">
+                    ${data.answer}
+                </span>
+            `;
+
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+        } catch (error) {
+            document.getElementById("thinking").innerHTML = `
+                <span class="bg-gray-700 text-red-400 px-4 py-2 rounded-xl inline-block">
+                    Server error.
+                </span>
+            `;
+        }
     }
-    document.getElementById("question-input").addEventListener("keypress", function(e) {
-        if (e.key === "Enter") askQuestion();
-    });
-    </script>
+
+    document.getElementById("question-input")
+        .addEventListener("keypress", function(e) {
+            if (e.key === "Enter") askQuestion();
+        });
+</script>
+    
 </body>
 </html>
