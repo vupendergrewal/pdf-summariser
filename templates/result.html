@@ -3,101 +3,170 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF Summariser — Results</title>
+    <title>DocuMind AI — Results</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        * { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); }
+        .gradient-text { background: linear-gradient(90deg, #667eea, #764ba2, #f093fb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .gradient-btn { background: linear-gradient(90deg, #667eea, #764ba2); }
+        .gradient-btn:hover { background: linear-gradient(90deg, #764ba2, #667eea); }
+        .card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); }
+        .card-glow { box-shadow: 0 0 40px rgba(102,126,234,0.15); }
+        .chat-input { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); }
+        .chat-input:focus { outline: none; border-color: #667eea; background: rgba(102,126,234,0.1); }
+        .user-bubble { background: linear-gradient(90deg, #667eea, #764ba2); }
+        .ai-bubble { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); }
+        .topic-tag { background: rgba(102,126,234,0.2); border: 1px solid rgba(102,126,234,0.4); }
+        .stat-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); transition: all 0.3s; }
+        .stat-card:hover { background: rgba(102,126,234,0.1); border-color: rgba(102,126,234,0.4); transform: translateY(-2px); }
+        .download-word { background: linear-gradient(90deg, #11998e, #38ef7d); }
+        .download-word:hover { opacity: 0.9; }
+        .download-pdf { background: linear-gradient(90deg, #eb3349, #f45c43); }
+        .download-pdf:hover { opacity: 0.9; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
+        ::-webkit-scrollbar-thumb { background: rgba(102,126,234,0.5); border-radius: 10px; }
+    </style>
 </head>
-<body class="bg-gray-900 min-h-screen p-6">
-    <div class="max-w-4xl mx-auto">
+<body class="gradient-bg min-h-screen text-white">
 
-        <h1 class="text-4xl font-bold text-white mb-1 text-center">📄 PDF Summariser</h1>
-        <p class="text-gray-400 text-center mb-8">Your AI-powered analysis is ready</p>
+    <!-- Navigation -->
+    <nav class="px-6 py-5 flex items-center justify-between max-w-7xl mx-auto border-b border-white border-opacity-5">
+        <a href="/" class="flex items-center gap-2">
+            <span class="text-2xl">🧠</span>
+            <span class="text-xl font-bold gradient-text">DocuMind AI</span>
+        </a>
+        <a href="/" class="gradient-btn px-5 py-2 rounded-full text-sm font-medium transition">
+            + New PDF
+        </a>
+    </nav>
+
+    <div class="max-w-5xl mx-auto px-6 py-10">
 
         {% if error %}
-        <div class="bg-red-800 text-white p-4 rounded-xl mb-6">❌ {{ error }}</div>
+        <div class="card rounded-2xl p-6 text-red-400 text-center">
+            ❌ {{ error }}
+        </div>
         {% else %}
 
+        <!-- Page Title -->
+        <div class="text-center mb-10">
+            <h1 class="text-4xl font-black mb-2">Analysis <span class="gradient-text">Complete</span></h1>
+            <p class="text-gray-400">{{ filename }}</p>
+        </div>
+
         <!-- Stats Row -->
-        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-            <div class="bg-gray-800 p-4 rounded-xl text-center">
-                <p class="text-blue-400 text-2xl font-bold">{{ word_count }}</p>
-                <p class="text-gray-400 text-xs">Total Words</p>
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+            <div class="stat-card rounded-2xl p-5 text-center">
+                <p class="text-3xl font-black gradient-text">{{ word_count }}</p>
+                <p class="text-gray-400 text-xs mt-1">Total Words</p>
             </div>
-            <div class="bg-gray-800 p-4 rounded-xl text-center">
-                <p class="text-green-400 text-2xl font-bold">{{ sentence_count }}</p>
-                <p class="text-gray-400 text-xs">Summary Lines</p>
+            <div class="stat-card rounded-2xl p-5 text-center">
+                <p class="text-3xl font-black" style="color:#38ef7d">{{ sentence_count }}</p>
+                <p class="text-gray-400 text-xs mt-1">Key Points</p>
             </div>
-            <div class="bg-gray-800 p-4 rounded-xl text-center">
-                <p class="text-yellow-400 text-2xl font-bold">{{ reading_time }}m</p>
-                <p class="text-gray-400 text-xs">Reading Time</p>
+            <div class="stat-card rounded-2xl p-5 text-center">
+                <p class="text-3xl font-black" style="color:#f093fb">{{ reading_time }}m</p>
+                <p class="text-gray-400 text-xs mt-1">Reading Time</p>
             </div>
-            <div class="bg-gray-800 p-4 rounded-xl text-center">
-                <p class="text-pink-400 text-2xl font-bold">{{ sentiment }}</p>
-                <p class="text-gray-400 text-xs">Tone</p>
+            <div class="stat-card rounded-2xl p-5 text-center">
+                {% if sentiment == "Positive" %}
+                <p class="text-3xl font-black" style="color:#38ef7d">😊</p>
+                {% elif sentiment == "Negative" %}
+                <p class="text-3xl font-black" style="color:#eb3349">😟</p>
+                {% else %}
+                <p class="text-3xl font-black" style="color:#667eea">😐</p>
+                {% endif %}
+                <p class="text-gray-400 text-xs mt-1">{{ sentiment }}</p>
             </div>
-            <div class="bg-gray-800 p-4 rounded-xl text-center">
-                <p class="text-purple-400 text-2xl font-bold">{{ difficulty }}</p>
-                <p class="text-gray-400 text-xs">Difficulty</p>
+            <div class="stat-card rounded-2xl p-5 text-center">
+                {% if difficulty == "Easy" %}
+                <p class="text-3xl font-black" style="color:#38ef7d">🟢</p>
+                {% elif difficulty == "Complex" %}
+                <p class="text-3xl font-black" style="color:#eb3349">🔴</p>
+                {% else %}
+                <p class="text-3xl font-black" style="color:#f093fb">🟡</p>
+                {% endif %}
+                <p class="text-gray-400 text-xs mt-1">{{ difficulty }}</p>
             </div>
         </div>
 
         <!-- Key Topics -->
-        <div class="bg-gray-800 p-5 rounded-xl mb-6">
-            <h2 class="text-white font-bold mb-3"> Key Topics</h2>
-            <div class="flex flex-wrap gap-2">
+        <div class="card rounded-2xl p-6 mb-6">
+            <h2 class="text-white font-bold text-lg mb-4">🏷️ Key Topics</h2>
+            <div class="flex flex-wrap gap-3">
                 {% for topic in topics %}
-                <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-sm">{{ topic }}</span>
+                <span class="topic-tag text-purple-300 px-4 py-2 rounded-full text-sm font-medium">{{ topic }}</span>
                 {% endfor %}
             </div>
         </div>
 
-        <!-- Summary Box -->
-        <div class="bg-gray-800 p-6 rounded-xl mb-6">
-            <h2 class="text-white text-xl font-bold mb-4">📝 Summary</h2>
-            <p class="text-gray-300 leading-relaxed">{{ summary }}</p>
+        <!-- Summary -->
+        <div class="card rounded-2xl p-6 mb-6 card-glow">
+            <h2 class="text-white font-bold text-lg mb-4">📝 AI Summary</h2>
+            <p class="text-gray-300 leading-relaxed text-sm">{{ summary }}</p>
         </div>
 
         <!-- Download Buttons -->
-        <div class="flex gap-4 mb-6">
-            <form action="/download/word" method="POST" class="flex-1">
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            <form action="/download/word" method="POST">
                 <input type="hidden" name="summary" value="{{ summary }}">
                 <input type="hidden" name="filename" value="{{ filename }}">
-                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl transition">
-                    📥 Download as Word
+                <button type="submit" class="download-word w-full py-4 rounded-2xl font-bold text-white transition shadow-lg">
+                    📄 Download as Word
                 </button>
             </form>
-            <form action="/download/pdf" method="POST" class="flex-1">
+            <form action="/download/pdf" method="POST">
                 <input type="hidden" name="summary" value="{{ summary }}">
                 <input type="hidden" name="filename" value="{{ filename }}">
-                <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition">
-                    📥 Download as PDF
+                <button type="submit" class="download-pdf w-full py-4 rounded-2xl font-bold text-white transition shadow-lg">
+                    📕 Download as PDF
                 </button>
             </form>
         </div>
 
         <!-- Chat Section -->
-        <div class="bg-gray-800 p-6 rounded-xl mb-6">
-            <h2 class="text-white text-xl font-bold mb-1">💬 Chat With Your PDF</h2>
-            <p class="text-gray-400 text-sm mb-4">Ask anything about this document — I remember the conversation!</p>
-            <div id="chat-box" class="bg-gray-900 rounded-xl p-4 h-72 overflow-y-auto mb-4 space-y-3">
-                <p class="text-gray-500 text-sm text-center">Ask your first question below 👇</p>
+        <div class="card rounded-2xl p-6 card-glow">
+            <div class="flex items-center gap-3 mb-2">
+                <span class="text-2xl">💬</span>
+                <div>
+                    <h2 class="text-white font-bold text-lg">Chat With Your PDF</h2>
+                    <p class="text-gray-500 text-xs">AI remembers your conversation</p>
+                </div>
+                <div class="ml-auto flex items-center gap-2 bg-green-900 bg-opacity-50 border border-green-700 rounded-full px-3 py-1">
+                    <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                    <span class="text-green-400 text-xs">Online</span>
+                </div>
             </div>
+
+            <div id="chat-box" class="bg-black bg-opacity-20 rounded-2xl p-4 h-80 overflow-y-auto mb-4 space-y-4 mt-4">
+                <div class="flex justify-center">
+                    <span class="text-gray-600 text-xs bg-white bg-opacity-5 px-4 py-2 rounded-full">
+                        Ask anything about this document 👇
+                    </span>
+                </div>
+            </div>
+
             <div class="flex gap-3">
                 <input type="text" id="question-input"
-                    placeholder="e.g. What is the main topic of this document?"
-                    class="flex-1 bg-gray-700 text-white rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"/>
+                    placeholder="e.g. What is the main argument of this document?"
+                    class="chat-input flex-1 text-white rounded-2xl px-5 py-3 text-sm transition"/>
                 <button onclick="askQuestion()"
-                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-xl transition">
-                    Ask
+                    class="gradient-btn text-white font-bold px-6 py-3 rounded-2xl transition whitespace-nowrap">
+                    Ask →
                 </button>
             </div>
         </div>
 
         {% endif %}
-
-        <a href="/" class="block text-center bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-xl transition">
-            ⬅ Summarise Another PDF
-        </a>
     </div>
+
+    <!-- Footer -->
+    <footer class="text-center py-8 text-gray-600 text-sm mt-10">
+        <p>Built with ❤️ using Python, Flask & Groq AI</p>
+    </footer>
 
     <script>
     const documentText = {{ document_text | tojson }};
@@ -110,15 +179,27 @@
         if (!question) return;
 
         chatBox.innerHTML += `
-            <div class="text-right mb-2">
-                <span class="bg-blue-600 text-white px-4 py-2 rounded-xl inline-block max-w-xs">${question}</span>
+            <div class="flex justify-end">
+                <span class="user-bubble text-white px-4 py-3 rounded-2xl rounded-tr-sm text-sm max-w-xs">
+                    ${question}
+                </span>
             </div>`;
 
         input.value = "";
+        input.disabled = true;
+
         const thinkingId = "thinking-" + Date.now();
         chatBox.innerHTML += `
-            <div class="text-left mb-2" id="${thinkingId}">
-                <span class="bg-gray-700 text-gray-400 px-4 py-2 rounded-xl inline-block">⏳ Thinking...</span>
+            <div class="flex justify-start" id="${thinkingId}">
+                <span class="ai-bubble text-gray-400 px-4 py-3 rounded-2xl rounded-tl-sm text-sm max-w-xs">
+                    <span class="flex items-center gap-2">
+                        <svg class="animate-spin h-3 w-3" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                        </svg>
+                        Thinking...
+                    </span>
+                </span>
             </div>`;
         chatBox.scrollTop = chatBox.scrollHeight;
 
@@ -137,13 +218,19 @@
             chatHistory.push({question: question, answer: data.answer});
 
             document.getElementById(thinkingId).innerHTML = `
-                <span class="bg-gray-700 text-gray-300 px-4 py-2 rounded-xl inline-block max-w-xs">${data.answer}</span>`;
+                <span class="ai-bubble text-gray-300 px-4 py-3 rounded-2xl rounded-tl-sm text-sm max-w-sm leading-relaxed">
+                    ${data.answer}
+                </span>`;
 
         } catch (error) {
             document.getElementById(thinkingId).innerHTML = `
-                <span class="bg-red-900 text-red-300 px-4 py-2 rounded-xl inline-block">Server error. Try again.</span>`;
+                <span class="ai-bubble text-red-400 px-4 py-3 rounded-2xl rounded-tl-sm text-sm">
+                    ❌ Server error. Please try again.
+                </span>`;
         }
 
+        input.disabled = false;
+        input.focus();
         chatBox.scrollTop = chatBox.scrollHeight;
     }
 
@@ -151,5 +238,6 @@
         if (e.key === "Enter") askQuestion();
     });
     </script>
+
 </body>
 </html>
