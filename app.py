@@ -184,3 +184,33 @@ def chat():
 
 if __name__ == "__main__":
     app.run(debug=True)
+    @app.route("/quiz", methods=["POST"])
+         def quiz():
+    data = request.get_json()
+    document_text = data.get("document_text", "")
+
+    if not document_text:
+        return {"error": "No document text found."}
+
+    try:
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[
+                {"role": "system", "content": """Generate exactly 5 multiple choice questions from the document.
+Return ONLY a JSON array with this exact structure, no extra text:
+[
+  {
+    "question": "Question text here?",
+    "options": ["Option A", "Option B", "Option C", "Option D"],
+    "answer": "Option A"
+  }
+]"""},
+                {"role": "user", "content": f"Document:\n{document_text[:5000]}"}
+            ]
+        )
+        raw = response.choices[0].message.content
+        clean = raw.replace("```json", "").replace("```", "").strip()
+        questions = json.loads(clean)
+        return {"questions": questions}
+    except Exception as e:
+        return {"error": str(e)}

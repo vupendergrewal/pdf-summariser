@@ -126,7 +126,44 @@
                 </button>
             </form>
         </div>
+<!-- Quiz Section -->
+<div class="card rounded-2xl p-6 mb-6">
+    <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-3">
+            <span class="text-2xl">🧠</span>
+            <div>
+                <h2 class="text-white font-bold text-lg">Test Your Understanding</h2>
+                <p class="text-gray-500 text-xs">AI generates quiz from your document</p>
+            </div>
+        </div>
+        <button onclick="generateQuiz()" id="quiz-btn"
+            class="gradient-btn text-white font-bold px-6 py-3 rounded-2xl transition text-sm">
+            ⚡ Generate Quiz
+        </button>
+    </div>
 
+    <!-- Loading State -->
+    <div id="quiz-loading" class="hidden text-center py-8">
+        <svg class="animate-spin h-8 w-8 mx-auto mb-3" style="color:#667eea" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+        </svg>
+        <p class="text-gray-400 text-sm">Generating quiz questions...</p>
+    </div>
+
+    <!-- Quiz Questions -->
+    <div id="quiz-container" class="hidden space-y-6"></div>
+
+    <!-- Score -->
+    <div id="quiz-score" class="hidden text-center py-6">
+        <p class="text-5xl font-black gradient-text mb-2" id="score-text">0/5</p>
+        <p class="text-gray-400 text-sm mb-4" id="score-message"></p>
+        <button onclick="generateQuiz()"
+            class="gradient-btn text-white font-bold px-6 py-3 rounded-2xl transition text-sm">
+            🔄 Try New Quiz
+        </button>
+    </div>
+</div>
         <!-- Chat Section -->
         <div class="card rounded-2xl p-6 card-glow">
             <div class="flex items-center gap-3 mb-2">
@@ -237,6 +274,141 @@
     document.getElementById("question-input").addEventListener("keypress", function(e) {
         if (e.key === "Enter") askQuestion();
     });
+
+    let quizQuestions = [];
+let userAnswers = {};
+
+async function generateQuiz() {
+    const quizBtn = document.getElementById("quiz-btn");
+    const quizLoading = document.getElementById("quiz-loading");
+    const quizContainer = document.getElementById("quiz-container");
+    const quizScore = document.getElementById("quiz-score");
+
+    quizBtn.classList.add("hidden");
+    quizLoading.classList.remove("hidden");
+    quizContainer.classList.add("hidden");
+    quizScore.classList.add("hidden");
+    quizContainer.innerHTML = "";
+    userAnswers = {};
+
+    try {
+        const response = await fetch("/quiz", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({document_text: documentText})
+        });
+
+        const data = await response.json();
+
+        if (data.error) {
+            quizLoading.classList.add("hidden");
+            quizBtn.classList.remove("hidden");
+            alert("Error generating quiz. Please try again.");
+            return;
+        }
+
+        quizQuestions = data.questions;
+        quizLoading.classList.add("hidden");
+        quizContainer.classList.remove("hidden");
+
+        quizQuestions.forEach((q, index) => {
+            quizContainer.innerHTML += `
+                <div class="bg-black bg-opacity-20 rounded-2xl p-5">
+                    <p class="text-white font-semibold mb-4">
+                        <span class="gradient-text font-black">Q${index + 1}.</span> ${q.question}
+                    </p>
+                    <div class="space-y-2" id="options-${index}">
+                        ${q.options.map(option => `
+                            <button onclick="selectAnswer(${index}, '${option.replace(/'/g, "\\'")}')"
+                                class="option-btn w-full text-left px-4 py-3 rounded-xl text-sm text-gray-300 transition"
+                                style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1)"
+                                id="option-${index}-${option.replace(/\s+/g, '-').replace(/'/g, '')}">
+                                ${option}
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>`;
+        });
+
+        quizContainer.innerHTML += `
+            <button onclick="submitQuiz()"
+                class="gradient-btn w-full py-4 rounded-2xl font-bold text-white transition"
+                id="submit-quiz-btn">
+                ✅ Submit Quiz
+            </button>`;
+
+    } catch (error) {
+        quizLoading.classList.add("hidden");
+        quizBtn.classList.remove("hidden");
+        alert("Server error. Please try again.");
+    }
+}
+
+function selectAnswer(questionIndex, option) {
+    userAnswers[questionIndex] = option;
+    const optionBtns = document.querySelectorAll(`#options-${questionIndex} button`);
+    optionBtns.forEach(btn => {
+        btn.style.background = "rgba(255,255,255,0.05)";
+        btn.style.borderColor = "rgba(255,255,255,0.1)";
+        btn.style.color = "#D1D5DB";
+    });
+    const safeOption = option.replace(/\s+/g, '-').replace(/'/g, '');
+    const selected = document.getElementById(`option-${questionIndex}-${safeOption}`);
+    if (selected) {
+        selected.style.background = "rgba(102,126,234,0.3)";
+        selected.style.borderColor = "#667eea";
+        selected.style.color = "white";
+    }
+}
+
+function submitQuiz() {
+    let score = 0;
+
+    quizQuestions.forEach((q, index) => {
+        const correct = q.answer;
+        const userAnswer = userAnswers[index];
+        const optionBtns = document.querySelectorAll(`#options-${index} button`);
+
+        optionBtns.forEach(btn => {
+            btn.disabled = true;
+            if (btn.textContent.trim() === correct) {
+                btn.style.background = "rgba(56,239,125,0.2)";
+                btn.style.borderColor = "#38ef7d";
+                btn.style.color = "#38ef7d";
+            }
+        });
+
+        if (userAnswer === correct) {
+            score++;
+        } else if (userAnswer) {
+            const safeAnswer = userAnswer.replace(/\s+/g, '-').replace(/'/g, '');
+            const wrongBtn = document.getElementById(`option-${index}-${safeAnswer}`);
+            if (wrongBtn) {
+                wrongBtn.style.background = "rgba(235,51,73,0.2)";
+                wrongBtn.style.borderColor = "#eb3349";
+                wrongBtn.style.color = "#eb3349";
+            }
+        }
+    });
+
+    document.getElementById("submit-quiz-btn").classList.add("hidden");
+
+    const scoreText = document.getElementById("score-text");
+    const scoreMessage = document.getElementById("score-message");
+    const quizScore = document.getElementById("quiz-score");
+
+    scoreText.textContent = `${score}/5`;
+
+    if (score === 5) {
+        scoreMessage.textContent = "🏆 Perfect score! You really understood this document!";
+    } else if (score >= 3) {
+        scoreMessage.textContent = "👍 Good job! You understood most of the document.";
+    } else {
+        scoreMessage.textContent = "📖 Keep reading! Try again to improve your score.";
+    }
+
+    quizScore.classList.remove("hidden");
+}
     </script>
 
 </body>
