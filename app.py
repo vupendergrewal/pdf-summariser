@@ -11,7 +11,7 @@ from reportlab.lib.pagesizes import A4
 import os
 import io
 import json
-import google.generativeai as genai
+from groq import Groq
 
 nltk.download('punkt', quiet=True)
 nltk.download('punkt_tab', quiet=True)
@@ -20,8 +20,7 @@ app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
 os.makedirs('uploads', exist_ok=True)
 
-genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
-model = genai.GenerativeModel("gemini-2.0-flash")
+client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
 def extract_text(pdf_path):
     doc = fitz.open(pdf_path)
@@ -43,18 +42,20 @@ def get_reading_time(text):
 
 def get_ai_insights(text):
     try:
-        prompt = f"""Analyze this document and return ONLY a JSON object with these exact keys:
+        response = client.chat.completions.create(
+            model="llama3-8b-8192",
+            messages=[
+                {"role": "system", "content": """Analyze this document and return ONLY a JSON object with these exact keys:
 - sentiment: one word (Positive, Negative, or Neutral)
 - topics: list of 5 short key topics
 - difficulty: one word (Easy, Moderate, or Complex)
-No extra text, just the JSON.
-
-Document:
-{text[:4000]}"""
-
-        response = model.generate_content(prompt)
-        raw = response.text.replace("```json", "").replace("```", "").strip()
-        return json.loads(raw)
+No extra text, just the JSON."""},
+                {"role": "user", "content": f"Document:\n{text[:4000]}"}
+            ]
+        )
+        raw = response.choices[0].message.content
+        clean = raw.replace("```json", "").replace("```", "").strip()
+        return json.loads(clean)
     except:
         return {
             "sentiment": "Neutral",
@@ -163,22 +164,21 @@ def chat():
         return {"answer": "Document missing. Please upload again."}
 
     try:
-        history_text = ""
+        messages = [
+            {"role": "system", "content": f"You are a helpful assistant. Answer questions based only on this document:\n\n{document_text[:6000]}"}
+        ]
+
         for h in history[-6:]:
-            history_text += f"User: {h['question']}\nAssistant: {h['answer']}\n\n"
+            messages.append({"role": "user", "content": h["question"]})
+            messages.append({"role": "assistant", "content": h["answer"]})
 
-        prompt = f"""You are a helpful assistant. Answer questions based only on this document.
+        messages.append({"role": "user", "content": question})
 
-Document:
-{document_text[:6000]}
-
-Previous conversation:
-{history_text}
-
-Question: {question}"""
-
-        response = model.generate_content(prompt)
-        return {"answer": response.text}
+        response = client.chat.completions.create(
+            model="llama3-8b-8192",
+            messages=messages
+        )
+        return {"answer": response.choices[0].message.content}
     except Exception as e:
         return {"answer": f"Error: {str(e)}"}
 
