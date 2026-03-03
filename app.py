@@ -184,8 +184,8 @@ def chat():
 
 if __name__ == "__main__":
     app.run(debug=True)
-    @app.route("/quiz", methods=["POST"])
-         def quiz():
+@app.route("/quiz", methods=["POST"])
+def quiz():
     data = request.get_json()
     document_text = data.get("document_text", "")
 
@@ -214,3 +214,6 @@ Return ONLY a JSON array with this exact structure, no extra text:
         return {"questions": questions}
     except Exception as e:
         return {"error": str(e)}
+
+if __name__ == "__main__":
+    app.run(debug=True)    
