@@ -43,7 +43,7 @@ def get_reading_time(text):
 def get_ai_insights(text):
     try:
         response = client.chat.completions.create(
-            model="llama3-8b-8192",
+          model="llama-3.3-70b-versatile",
             messages=[
                 {"role": "system", "content": """Analyze this document and return ONLY a JSON object with these exact keys:
 - sentiment: one word (Positive, Negative, or Neutral)
@@ -175,7 +175,7 @@ def chat():
         messages.append({"role": "user", "content": question})
 
         response = client.chat.completions.create(
-            model="llama3-8b-8192",
+           model="llama-3.3-70b-versatile",
             messages=messages
         )
         return {"answer": response.choices[0].message.content}
