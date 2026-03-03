@@ -3,22 +3,245 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF Summariser</title>
+    <title>DocuMind AI — Chat With Your PDF</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        * { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); }
+        .gradient-text { background: linear-gradient(90deg, #667eea, #764ba2, #f093fb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .gradient-btn { background: linear-gradient(90deg, #667eea, #764ba2); }
+        .gradient-btn:hover { background: linear-gradient(90deg, #764ba2, #667eea); }
+        .card-glow { box-shadow: 0 0 30px rgba(102, 126, 234, 0.15); }
+        .upload-zone { background: rgba(255,255,255,0.03); border: 2px dashed rgba(102,126,234,0.4); transition: all 0.3s; }
+        .upload-zone:hover { border-color: #667eea; background: rgba(102,126,234,0.08); }
+        .feature-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); transition: all 0.3s; }
+        .feature-card:hover { background: rgba(102,126,234,0.1); border-color: rgba(102,126,234,0.4); transform: translateY(-4px); }
+        .animate-float { animation: float 6s ease-in-out infinite; }
+        @keyframes float { 0%,100% { transform: translateY(0px); } 50% { transform: translateY(-20px); } }
+        .animate-pulse-slow { animation: pulse 4s cubic-bezier(0.4,0,0.6,1) infinite; }
+        .drag-active { border-color: #667eea !important; background: rgba(102,126,234,0.15) !important; }
+    </style>
 </head>
-<body class="bg-gray-900 min-h-screen flex items-center justify-center">
-    <div class="bg-gray-800 p-10 rounded-2xl shadow-2xl w-full max-w-lg text-center">
-        <h1 class="text-4xl font-bold text-white mb-2">📄 PDF Summariser</h1>
-        <p class="text-gray-400 mb-8">Upload a PDF and get an AI-powered summary instantly</p>
-        <form action="/summarise" method="POST" enctype="multipart/form-data">
-            <div class="border-2 border-dashed border-gray-500 rounded-xl p-8 mb-6 hover:border-blue-400 transition">
-                <input type="file" name="pdf" accept=".pdf" class="text-gray-300 w-full cursor-pointer"/>
-                <p class="text-gray-500 text-sm mt-2">Only PDF files supported</p>
+<body class="gradient-bg min-h-screen text-white">
+
+    <!-- Navigation -->
+    <nav class="px-6 py-5 flex items-center justify-between max-w-7xl mx-auto">
+        <div class="flex items-center gap-2">
+            <span class="text-2xl">🧠</span>
+            <span class="text-xl font-bold gradient-text">DocuMind AI</span>
+        </div>
+        <div class="hidden md:flex items-center gap-8 text-gray-400 text-sm">
+            <a href="#features" class="hover:text-white transition">Features</a>
+            <a href="#how-it-works" class="hover:text-white transition">How it works</a>
+            <a href="#upload" class="gradient-btn text-white px-5 py-2 rounded-full text-sm font-medium transition">
+                Try Free →
+            </a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="max-w-6xl mx-auto px-6 pt-16 pb-12 text-center">
+        <div class="inline-flex items-center gap-2 bg-purple-900 bg-opacity-50 border border-purple-700 rounded-full px-4 py-2 text-sm text-purple-300 mb-8">
+            <span class="animate-pulse-slow">●</span>
+            Powered by Groq AI — Fastest AI inference on the planet
+        </div>
+
+        <h1 class="text-5xl md:text-7xl font-black mb-6 leading-tight">
+            Don't Read PDFs.<br>
+            <span class="gradient-text">Talk To Them.</span>
+        </h1>
+
+        <p class="text-xl text-gray-400 mb-10 max-w-2xl mx-auto leading-relaxed">
+            Upload any PDF and get an instant AI summary, extract key insights, analyze sentiment, and have a full conversation with your document.
+        </p>
+
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+            <a href="#upload" class="gradient-btn px-8 py-4 rounded-full text-lg font-semibold transition shadow-lg">
+                🚀 Try It Free — No Signup
+            </a>
+            <div class="flex items-center gap-2 text-gray-400 text-sm">
+                <span>✓ Free forever</span>
+                <span>•</span>
+                <span>✓ No credit card</span>
+                <span>•</span>
+                <span>✓ Instant results</span>
             </div>
-            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition duration-200">
-                Summarise My PDF
-            </button>
-        </form>
-    </div>
+        </div>
+
+        <!-- Floating Stats -->
+        <div class="grid grid-cols-3 gap-4 max-w-lg mx-auto mb-16">
+            <div class="bg-white bg-opacity-5 rounded-2xl p-4 border border-white border-opacity-10">
+                <p class="text-3xl font-black gradient-text">⚡</p>
+                <p class="text-white font-semibold text-sm mt-1">Ultra Fast</p>
+                <p class="text-gray-500 text-xs">Groq powered</p>
+            </div>
+            <div class="bg-white bg-opacity-5 rounded-2xl p-4 border border-white border-opacity-10">
+                <p class="text-3xl font-black gradient-text">🆓</p>
+                <p class="text-white font-semibold text-sm mt-1">100% Free</p>
+                <p class="text-gray-500 text-xs">No limits</p>
+            </div>
+            <div class="bg-white bg-opacity-5 rounded-2xl p-4 border border-white border-opacity-10">
+                <p class="text-3xl font-black gradient-text">🔒</p>
+                <p class="text-white font-semibold text-sm mt-1">Private</p>
+                <p class="text-gray-500 text-xs">Not stored</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="max-w-6xl mx-auto px-6 py-16">
+        <h2 class="text-3xl font-bold text-center mb-4">Everything You Need</h2>
+        <p class="text-gray-400 text-center mb-12">Not just a summariser — a complete AI document intelligence platform</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="feature-card rounded-2xl p-6">
+                <div class="text-4xl mb-4">📝</div>
+                <h3 class="text-white font-bold text-lg mb-2">Smart Summary</h3>
+                <p class="text-gray-400 text-sm leading-relaxed">Get the key points of any document in seconds. No more reading 50-page reports.</p>
+            </div>
+            <div class="feature-card rounded-2xl p-6">
+                <div class="text-4xl mb-4">💬</div>
+                <h3 class="text-white font-bold text-lg mb-2">Chat With PDF</h3>
+                <p class="text-gray-400 text-sm leading-relaxed">Ask any question and get instant answers from your document. AI remembers the conversation.</p>
+            </div>
+            <div class="feature-card rounded-2xl p-6">
+                <div class="text-4xl mb-4">🏷️</div>
+                <h3 class="text-white font-bold text-lg mb-2">Key Topics</h3>
+                <p class="text-gray-400 text-sm leading-relaxed">Automatically extracts the 5 most important topics from your document.</p>
+            </div>
+            <div class="feature-card rounded-2xl p-6">
+                <div class="text-4xl mb-4">😊</div>
+                <h3 class="text-white font-bold text-lg mb-2">Sentiment Analysis</h3>
+                <p class="text-gray-400 text-sm leading-relaxed">Understand the tone and emotion of the document instantly.</p>
+            </div>
+            <div class="feature-card rounded-2xl p-6">
+                <div class="text-4xl mb-4">📥</div>
+                <h3 class="text-white font-bold text-lg mb-2">Export Anywhere</h3>
+                <p class="text-gray-400 text-sm leading-relaxed">Download your summary as a Word document or PDF with one click.</p>
+            </div>
+            <div class="feature-card rounded-2xl p-6">
+                <div class="text-4xl mb-4">⏱️</div>
+                <h3 class="text-white font-bold text-lg mb-2">Reading Time</h3>
+                <p class="text-gray-400 text-sm leading-relaxed">Know exactly how long the document would take to read before you start.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section id="how-it-works" class="max-w-4xl mx-auto px-6 py-16 text-center">
+        <h2 class="text-3xl font-bold mb-4">How It Works</h2>
+        <p class="text-gray-400 mb-12">3 simple steps to unlock your document</p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="flex flex-col items-center">
+                <div class="w-16 h-16 gradient-btn rounded-full flex items-center justify-center text-2xl font-black mb-4">1</div>
+                <h3 class="font-bold mb-2">Upload PDF</h3>
+                <p class="text-gray-400 text-sm">Drag and drop or click to upload any PDF file</p>
+            </div>
+            <div class="flex flex-col items-center">
+                <div class="w-16 h-16 gradient-btn rounded-full flex items-center justify-center text-2xl font-black mb-4">2</div>
+                <h3 class="font-bold mb-2">AI Analyses</h3>
+                <p class="text-gray-400 text-sm">Our AI reads, understands and summarises the document</p>
+            </div>
+            <div class="flex flex-col items-center">
+                <div class="w-16 h-16 gradient-btn rounded-full flex items-center justify-center text-2xl font-black mb-4">3</div>
+                <h3 class="font-bold mb-2">Chat & Export</h3>
+                <p class="text-gray-400 text-sm">Ask questions and download your summary</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Upload Section -->
+    <section id="upload" class="max-w-2xl mx-auto px-6 py-16">
+        <div class="bg-white bg-opacity-5 border border-white border-opacity-10 rounded-3xl p-10 card-glow text-center">
+            <h2 class="text-3xl font-bold mb-2">Upload Your PDF</h2>
+            <p class="text-gray-400 mb-8">Free, instant, and private</p>
+
+            <form action="/summarise" method="POST" enctype="multipart/form-data" id="upload-form">
+                <div class="upload-zone rounded-2xl p-10 mb-6 cursor-pointer" id="drop-zone"
+                    onclick="document.getElementById('file-input').click()">
+                    <div id="drop-content">
+                        <div class="text-6xl mb-4 animate-float">📄</div>
+                        <p class="text-white font-semibold text-lg mb-1">Drop your PDF here</p>
+                        <p class="text-gray-500 text-sm">or click to browse files</p>
+                    </div>
+                    <div id="file-selected" class="hidden">
+                        <div class="text-6xl mb-4">✅</div>
+                        <p class="text-green-400 font-semibold text-lg" id="file-name">File selected</p>
+                        <p class="text-gray-500 text-sm">Ready to analyse</p>
+                    </div>
+                    <input type="file" name="pdf" accept=".pdf" id="file-input" class="hidden"/>
+                </div>
+
+                <button type="submit" id="submit-btn"
+                    class="gradient-btn w-full py-4 rounded-2xl text-lg font-bold transition shadow-xl">
+                     Analyse My PDF 🍆
+                </button>
+
+                <div id="loading" class="hidden mt-6">
+                    <div class="flex items-center justify-center gap-3 text-purple-300">
+                        <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                        </svg>
+                        <span>Analysing your document...</span>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="text-center py-8 text-gray-600 text-sm">
+        <p>Built with  using Python, Flask & Groq AI</p>
+        <p class="mt-1">© 2026 DocuMind AI</p>
+    </footer>
+
+    <script>
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const dropContent = document.getElementById('drop-content');
+        const fileSelected = document.getElementById('file-selected');
+        const fileName = document.getElementById('file-name');
+        const form = document.getElementById('upload-form');
+        const loading = document.getElementById('loading');
+        const submitBtn = document.getElementById('submit-btn');
+
+        fileInput.addEventListener('change', function() {
+            if (this.files[0]) {
+                fileName.textContent = this.files[0].name;
+                dropContent.classList.add('hidden');
+                fileSelected.classList.remove('hidden');
+            }
+        });
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-active');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('drag-active');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-active');
+            const file = e.dataTransfer.files[0];
+            if (file && file.type === 'application/pdf') {
+                const dt = new DataTransfer();
+                dt.items.add(file);
+                fileInput.files = dt.files;
+                fileName.textContent = file.name;
+                dropContent.classList.add('hidden');
+                fileSelected.classList.remove('hidden');
+            }
+        });
+
+        form.addEventListener('submit', function() {
+            submitBtn.classList.add('hidden');
+            loading.classList.remove('hidden');
+        });
+    </script>
 </body>
 </html>
